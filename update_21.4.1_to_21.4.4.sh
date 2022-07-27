@@ -3,6 +3,33 @@
 set -e
 set -o pipefail
 
+###################################
+# HANDLE CLI PARAMETERS
+###################################
+
+SKIP_SYNC=0
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+  key="$1"
+
+  case $key in
+    -s|--skip-sync)
+      SKIP_SYNC=1
+      shift
+      ;;
+    -h|--help)
+      print_help
+      shift # past value
+      ;;
+    *)    # unknown option
+      POSITIONAL+=("$1") # save it in an array for later
+      shift # past argument
+      ;;
+  esac
+done
+
 # verify if the country has been provided
 if [[ ! -v country ]]
 then
@@ -487,8 +514,11 @@ systemctl start gvmd
 systemctl start gsad
 
 # begin syncing threat feeds
-sudo -u gvm /usr/local/sbin/greenbone-feed-sync --type SCAP
-sudo -u gvm /usr/local/bin/greenbone-nvt-sync
-sudo -u gvm /usr/local/sbin/greenbone-feed-sync --type CERT
-sudo -u gvm /usr/local/sbin/greenbone-feed-sync --type GVMD_DATA
-su gvm -c /usr/bin/sudo /usr/local/sbin/openvas --update-vt-info
+if [[ ${SKIP_SYNC} -eq 0 ]]
+then
+  sudo -u gvm /usr/local/sbin/greenbone-feed-sync --type SCAP
+  sudo -u gvm /usr/local/bin/greenbone-nvt-sync
+  sudo -u gvm /usr/local/sbin/greenbone-feed-sync --type CERT
+  sudo -u gvm /usr/local/sbin/greenbone-feed-sync --type GVMD_DATA
+  su gvm -c /usr/bin/sudo /usr/local/sbin/openvas --update-vt-info
+fi
