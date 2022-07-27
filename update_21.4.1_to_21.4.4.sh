@@ -3,12 +3,59 @@
 set -e
 set -o pipefail
 
+# verify if the country has been provided
+if [[ ! -v country ]]
+then
+  printf "ERROR: You must set and export the country variable before running this script. Exiting\n\n"
+  exit 1
+fi
+
+# verify if the state has been provided
+if [[ ! -v state ]]
+then
+  printf "ERROR: You must set and export the state variable before running this script. Exiting\n\n"
+  exit 1
+fi
+
+# verify if the city has been provided
+if [[ ! -v city ]]
+then
+  printf "ERROR: You must set and export the city variable before running this script. Exiting\n\n"
+  exit 1
+fi
+
+# verify if the company name has been provided
+if [[ ! -v company_name ]]
+then
+  printf "ERROR: You must set and export the company_name variable before running this script. Exiting\n\n"
+  exit 1
+fi
+
+# verify if the org_unit has been provided
+if [[ ! -v org_unit ]]
+then
+  printf "ERROR: You must set and export the org_unit variable before running this script. Exiting\n\n"
+  exit 1
+fi
+
+# verify if the common_name has been provided
+if [[ ! -v common_name ]]
+then
+  printf "ERROR: You must set and export the common_name variable before running this script. Exiting\n\n"
+  exit 1
+fi
+
 # verify we are running as the correct user
 if [[ "$(whoami)" != "root" ]]
 then
   printf "ERROR: You must be root to execute this script. Exiting\n\n"
   exit 1
 fi
+
+# ensure a certificate can be generated using the variables assigned
+openssl req -x509 -newkey rsa:2048 -nodes -days 3640 -keyout /tmp/servercert.key -out /tmp/servercert.pem -subj "/C=${country}/ST=${state}/L=${city}/O=${company_name}/OU=${org_unit}/CN=${common_name}"
+
+rm /tmp/servercert.*
 
 # stop the services being worked on
 systemctl stop openvas
@@ -407,7 +454,7 @@ sudo setcap CAP_NET_BIND_SERVICE=+eip /usr/local/sbin/gsad
 mkdir -p /var/lib/gvm/CA/
 
 # create a self signed certificate for the vulnerability scanner
-openssl req -x509 -newkey rsa:2048 -nodes -days 3640 -keyout /var/lib/gvm/CA/servercert.key -out /var/lib/gvm/CA/servercert.pem -subj "/C=US/ST=NY/L=NY/O=ActionIQ/OU=Security/CN=gsa.security.actioniq.co"
+openssl req -x509 -newkey rsa:2048 -nodes -days 3640 -keyout /var/lib/gvm/CA/servercert.key -out /var/lib/gvm/CA/servercert.pem -subj "/C=${country}/ST=${state}/L=${city}/O=${company_name}/OU=${org_unit}/CN=${common_name}"
 
 # allow the gvm user to access its certificate
 chown -R gvm:gvm /var/lib/gvm/CA/
