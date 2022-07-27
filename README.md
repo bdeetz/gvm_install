@@ -1,3 +1,6 @@
+# FORK MAINTAINER NOTE
+`install_gvm.sh` was forked from the `yu210148/gvm_install` github repo. This repo made some small improvements to the script but overall quality remains quite low. Because `install_gvm.sh` continues to function as it was originally implemented I will not be working with it futher and instead will be maintaining scripts to upgrade an environment created by that script. Within the upgrade scripts, significant configuration changes may be performed in order to re-architect a host's configuration iteratively throughout versions. As a result, it is assumed that the full sequences of prior scripts have been executed before executing the latest upgrade script.
+
 # gvm_install
 A script to install GVM 20 / 21 on Ubuntu 20.04
 
